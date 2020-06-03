@@ -33,11 +33,11 @@ class QuestionForm(forms.ModelForm):
 class QuestionAdminForm(forms.ModelForm):
     class Meta:
         model = Question
-        fields = ('question_text', 'choice_group', 'choice', 'feedback' ,'notes', 'level', 'subject', 'review_status',)
+        fields = ('question_text', 'choice_group', 'choice', 'feedback' ,'notes', 'review_status',)
 
         widgets = {
             # 'choice': forms.RadioSelect(attrs={'style': 'display: inline-block' }),
-            'notes': forms.TextInput,
+            # 'notes': forms.TextInput,
         }
 
     def __init__(self, *args, **kwargs):

@@ -54,14 +54,8 @@ class QuestionUpdateView(UserPassesTestMixin, UpdateView):
     def test_func(self):
         if (self.request.user == self.get_object().created_by):
             return True
-        elif (self.request.user == 'admin'):  #Admin user id
-            return True
         else:
             return False
-
-
-        # return self.request.user == self.get_object().created_by
-        # return True
 
 
 class QuestionAdminUpdateView(UserPassesTestMixin, UpdateView):
@@ -77,9 +71,7 @@ class QuestionAdminUpdateView(UserPassesTestMixin, UpdateView):
         return kwargs
 
     def test_func(self):
-        if (self.request.user == self.get_object().created_by):
-            return True
-        elif (self.request.user == 'admin'):  #Admin user id
+        if self.request.user.username == 'admin':  #Admin user id
             return True
         else:
             return False

@@ -23,7 +23,7 @@
     {% for question in object_list %}
         <tr>
             {% if user.username == 'admin' %}
-                <td><button class="btn btn-outline-primary btn-sm"><a href="{% url 'questions:question-update' question.pk %}">EDIT</a></button></td>
+                <td><button class="btn btn-outline-primary btn-sm"><a href="{% url 'questions:question-admin-update' question.pk %}">EDIT</a></button></td>
             {% endif %}
             <td><a href="{% url 'questions:question-detail' question.pk %}">{{ question.question_text }}</a></td>
             <td>{{ question.choice }}</td>
