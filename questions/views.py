@@ -87,7 +87,7 @@ class QuestionListView(LoginRequiredMixin, ListView):
         question_list = Question.objects.order_by("-last_modified").filter(created_by=user).filter(review_status='UNREVIEWED')
         return question_list
 
-class QuestionListAllView(ListView):
+class QuestionListAllView(LoginRequiredMixin, ListView):
     model = Question
     template_name = "questions/question_list_all.html"
     # permission_required = ('questions.can_view_all_questions')
@@ -147,7 +147,10 @@ class ChoiceGroupCreateView(LoginRequiredMixin, CreateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["objects"] = self.model.objects.order_by('last_modified').filter(created_by=self.request.user)
+        if self.request.user.username == "admin":
+            context["objects"] = self.model.objects.all().order_by('last_modified')
+        else:
+            context["objects"] = self.model.objects.order_by('last_modified').filter(created_by=self.request.user)
         return context
 
 
