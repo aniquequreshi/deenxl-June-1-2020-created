@@ -1,6 +1,6 @@
 {% extends "questions/base.html" %}
 
-{% block title %}My Questions List{% endblock %}
+{% block title %}Everyone's Questions List{% endblock %}
 
 {% block content %}
 
@@ -9,26 +9,27 @@
 {#    <table class="table table-bordered table-sm ">#}
     <thead>
         <tr>
+            {% if user.username == 'admin' %}
+                <td>Action</td>
+            {% endif %}
             <td>Question</td>
             <td>Correct Choice</td>
             <td>Choice Group</td>
-            <td>Action</td>
+            <td>Created By</td>
             <td>Modified</td>
         </tr>
     </thead>
     <tbody>
     {% for question in object_list %}
         <tr>
-            <td><a href="{% url 'questions:question-update' question.pk %}">{{ question.question_text }}</a></td>
+            {% if user.username == 'admin' %}
+                <td><button class="btn btn-outline-primary btn-sm"><a href="{% url 'questions:question-update' question.pk %}">EDIT</a></button></td>
+            {% endif %}
+            <td><a href="{% url 'questions:question-detail' question.pk %}">{{ question.question_text }}</a></td>
             <td>{{ question.choice }}</td>
             <td>{{ question.choice_group }}</td>
-            <td>
-                <button class="btn btn-outline-secondary btn-sm"><a href="{% url 'questions:question-copy' question.pk %}">Copy</a></button>
-                <button class="btn btn-outline-primary btn-sm"><a href="{% url 'questions:question-generate' question.pk %}">Generate</a></button>
-            </td>
-            <td>
-                {{ question.last_modified }}
-            </td>
+            <td>{{ question.created_by }}</td>
+            <td>{{ question.last_modified }}</td>
 
         </tr>
     {% endfor %}

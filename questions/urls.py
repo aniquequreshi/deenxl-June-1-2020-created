@@ -10,8 +10,11 @@ urlpatterns = [
     path('create/', views.QuestionCreateView.as_view(), name='question-create'),
     path('update/<int:pk>/', views.QuestionUpdateView.as_view(), name='question-update'),
     path('list/', views.QuestionListView.as_view(), name='question-list'),
-    # path('detail/<int:pk>/', views.DetailView.as_view(), name='question-detail'),
+    path('list/all/', views.QuestionListAllView.as_view(), name='question-list-all'),  #see everyone's questions
+    path('detail/<int:pk>/', views.QuestionDetail, name='question-detail'),
     # path('delete/<int:pk>/', views.DeleteView.as_view(), name='question-delete'),
+
+    path('admin-update/<int:pk>/', views.QuestionAdminUpdateView.as_view(), name='question-admin-update'),
 
     path('choice/group/create/', views.ChoiceGroupCreateView.as_view(), name='choice-group-create'),
     path('choice/group/update/<int:pk>/', views.ChoiceGroupUpdateView.as_view(), name='choice-group-update'),

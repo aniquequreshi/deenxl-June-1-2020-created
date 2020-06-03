@@ -1,9 +1,8 @@
 from django.conf import settings
 from django.db import models
-from django.contrib import admin
+# from django.contrib import admin
 from django.urls import reverse
-from django.utils.translation import gettext_lazy as _
-
+# from django.utils.translation import gettext_lazy as _
 
 # Create your models here.
 
@@ -90,6 +89,18 @@ class Question(models.Model):
     # verbose_name_plural = "questions_standard"
     class Meta:
         ordering = ['-last_modified']
+        permissions = (
+                ('can_edit_unreviewed_questions', 'Can Edit Unreviewed Questions'),
+        )
 
     def __str__(self):
         return self.question_text
+
+# @receiver(post_save, sender=Question)
+# def set_permission(sender, instance, **kwargs):
+#     """Add object specific permission to the Question"""
+#     assign_perm(
+#         "change_question",  # The permission we want to assign.
+#         instance.created_by,  # The user object.
+#         instance  # The object we want to assign the permission to.
+#     )

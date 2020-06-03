@@ -3,14 +3,16 @@ from django.template import loader
 from django.urls import reverse
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, UpdateView, ListView, DetailView
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+# from guardian.mixins import PermissionRequiredMixin
+# from guardian.shortcuts import get_objects_for_user
 from random import randint, shuffle
 from django.contrib import messages
 from django.http import HttpResponse
 from tablib import Dataset
 
 from .models import Question, Choice, ChoiceGroup, Subject
-from .forms import QuestionForm, ChoiceForm
+from .forms import QuestionForm, ChoiceForm, QuestionAdminForm
 from .resources import *
 from django.forms import inlineformset_factory
 
@@ -26,9 +28,6 @@ class QuestionCreateView(LoginRequiredMixin, CreateView):
     # fields = '__all__'
     success_url = reverse_lazy('questions:question-list')
 
-    # def get_queryset(self):
-    #     queryset = super().get_queryset()
-    #     return queryset.filter(created_by=self.request.user)
 
     def form_valid(self, form):
         form.instance.created_by = self.request.user
@@ -40,7 +39,7 @@ class QuestionCreateView(LoginRequiredMixin, CreateView):
         return kwargs
 
 
-class QuestionUpdateView(LoginRequiredMixin, UpdateView):
+class QuestionUpdateView(UserPassesTestMixin, UpdateView):
     model = Question
     form_class = QuestionForm
 
@@ -52,15 +51,75 @@ class QuestionUpdateView(LoginRequiredMixin, UpdateView):
         kwargs['user'] = self.request.user
         return kwargs
 
+    def test_func(self):
+        if (self.request.user == self.get_object().created_by):
+            return True
+        elif (self.request.user == 'admin'):  #Admin user id
+            return True
+        else:
+            return False
+
+
+        # return self.request.user == self.get_object().created_by
+        # return True
+
+
+class QuestionAdminUpdateView(UserPassesTestMixin, UpdateView):
+    model = Question
+    form_class = QuestionAdminForm
+
+    # fields = ('question_text', 'choice_group', 'choice', 'notes',)
+    success_url = reverse_lazy('questions:question-list-all')
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+    def test_func(self):
+        if (self.request.user == self.get_object().created_by):
+            return True
+        elif (self.request.user == 'admin'):  #Admin user id
+            return True
+        else:
+            return False
+
+
+
 
 class QuestionListView(LoginRequiredMixin, ListView):
     model = Question
 
     def get_queryset(self):
         user = self.request.user
-        question_list = Question.objects.order_by("-last_modified").filter(created_by=user)
+        question_list = Question.objects.order_by("-last_modified").filter(created_by=user).filter(review_status='UR')
         return question_list
 
+class QuestionListAllView(ListView):
+    model = Question
+    template_name = "questions/question_list_all.html"
+    # permission_required = ('questions.can_view_all_questions')
+
+    def get_queryset(self):
+        # user = self.request.user
+        question_list = Question.objects.order_by("-last_modified").filter(review_status='UR')
+        return question_list
+
+# class QuestionDetailView(DetailView):
+#     model = Question
+#     # template_name = "questions/permission_required.html"
+#     # permission_required = ('questions.can_view_all_questions')
+#
+#     def get_queryset(self):
+#         # user = self.request.user
+#         question_list = Question.objects.order_by("-last_modified").filter(review_status='UR')
+#         return question_list
+#
+#     def get_context_data(self, **kwargs):
+#         context = super(QuestionDetailView, self).get_context_data(**kwargs)
+#         context['choices'] = Choice.objects.filter(self.model.choice_group)
+#         # other code
+#         return context
 
 # class QuestionDetailView(LoginRequiredMixin, DetailView):
 #     model = Question
@@ -203,6 +262,23 @@ def QuestionCopy(request, pk):
     return redirect('questions:question-update', pk=question.id)
     # return render(request, "questions/question_copy.html", context)
     # questions / question_form.html
+
+
+def QuestionDetail(request, pk):
+    question = Question.objects.get(id=pk)
+    choice_group = question.choice_group
+    correct_choice = question.choice
+    # Below is needed to create a Queryset for combining
+    correct_choice_qs = Choice.objects.filter(choice_group=choice_group, choice=correct_choice).order_by("?")[:1]
+    wrong_choices = Choice.objects.filter(choice_group=choice_group).exclude(choice=correct_choice)
+    all_choices = correct_choice_qs | wrong_choices
+
+    all_choices_list = list(all_choices)
+    # shuffle(all_choices_list)
+
+    context = {'question': question, 'all_choices': all_choices_list}
+    return render(request, "questions/question_detail.html", context)
+
 
 
 def QuestionGenerate(request, pk):
