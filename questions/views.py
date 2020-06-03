@@ -84,7 +84,7 @@ class QuestionListView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         user = self.request.user
-        question_list = Question.objects.order_by("-last_modified").filter(created_by=user).filter(review_status='UR')
+        question_list = Question.objects.order_by("-last_modified").filter(created_by=user).filter(review_status='UNREVIEWED')
         return question_list
 
 class QuestionListAllView(ListView):
@@ -94,7 +94,7 @@ class QuestionListAllView(ListView):
 
     def get_queryset(self):
         # user = self.request.user
-        question_list = Question.objects.order_by("-last_modified").filter(review_status='UR')
+        question_list = Question.objects.order_by("-last_modified").filter(review_status='UNREVIEWED')
         return question_list
 
 # class QuestionDetailView(DetailView):

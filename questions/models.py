@@ -69,13 +69,17 @@ class Question(models.Model):
     subject = models.ManyToManyField(Subject)
     level = models.ManyToManyField(Level)
 
-    UNREVIEWED = 'UR'
-    PENDING = 'PN'
-    APPROVED = 'AP'
+    UNREVIEWED = 'UNREVIEWED'
+    PENDING = 'PENDING'
+    REJECTED = 'REJECTED'
+    ACCEPTED = 'ACCEPTED'
+    FINALIZED = 'FINALIZED'
     REVIEW_STATUS_CHOICES = [
-        (UNREVIEWED, 'Unreviewed'),
-        (PENDING, 'Pending'),
-        (APPROVED, 'Approved'),
+        (UNREVIEWED, 'UNREVIEWED'),
+        (PENDING, 'PENDING'),
+        (REJECTED, 'REJECTED'),
+        (ACCEPTED, 'ACCEPTED'),
+        (FINALIZED, 'FINALIZED'),
     ]
 
     review_status = models.CharField(max_length=100, null=True, blank=True, verbose_name='Review Status', choices=REVIEW_STATUS_CHOICES, default=UNREVIEWED)
@@ -89,18 +93,11 @@ class Question(models.Model):
     # verbose_name_plural = "questions_standard"
     class Meta:
         ordering = ['-last_modified']
-        permissions = (
-                ('can_edit_unreviewed_questions', 'Can Edit Unreviewed Questions'),
-        )
+        # works, but not needed at this time
+        # permissions = (
+        #         ('can_edit_unreviewed_questions', 'Can Edit Unreviewed Questions'),
+        # )
 
     def __str__(self):
         return self.question_text
 
-# @receiver(post_save, sender=Question)
-# def set_permission(sender, instance, **kwargs):
-#     """Add object specific permission to the Question"""
-#     assign_perm(
-#         "change_question",  # The permission we want to assign.
-#         instance.created_by,  # The user object.
-#         instance  # The object we want to assign the permission to.
-#     )
